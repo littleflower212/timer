@@ -21,10 +21,11 @@ timer/
 - 立即提醒：可手动触发测试通知
 
 ### 安装方法
+- git clone git@github.com:littleflower212/timer.git
 - 打开 Chrome，地址栏输入 chrome://extensions/
 - 右上角开启 开发者模式
 - 点击 加载已解压的扩展程序
-- 选择文件夹：/Users/wonder.d.wang/Documents/mine/projects/timer
+- 选择文件夹：/下载的扩展程序文件夹位置
 - 首次安装时，Chrome 会询问是否允许通知，请点击 允许
 
 ### 使用说明
