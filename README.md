@@ -1,5 +1,6 @@
-### Chrome 健康提醒插件，项目结构如下：
+### Chrome 健康提醒插件
 
+项目结构如下：
 ```
 timer/
 ├── manifest.json          # 插件配置
