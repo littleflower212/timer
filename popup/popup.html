@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>健康提醒</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-icon">🌿</div>
+    <div>
+      <h1>健康提醒</h1>
+      <p class="subtitle">关爱身体，从现在开始</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="card" id="water-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="emoji">💧</span>
+          <span>喝水提醒</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="water-enabled">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="card-body">
+        <div class="interval-row">
+          <label for="water-interval">提醒间隔</label>
+          <div class="interval-control">
+            <input type="range" id="water-interval" min="15" max="120" step="5" value="45">
+            <span class="interval-value" id="water-interval-label">45 分钟</span>
+          </div>
+        </div>
+        <div class="countdown" id="water-countdown">—</div>
+        <button class="btn btn-secondary" id="water-now">立即提醒</button>
+      </div>
+    </section>
+
+    <section class="card" id="bathroom-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="emoji">🚻</span>
+          <span>上厕所提醒</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="bathroom-enabled">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="card-body">
+        <div class="interval-row">
+          <label for="bathroom-interval">提醒间隔</label>
+          <div class="interval-control">
+            <input type="range" id="bathroom-interval" min="30" max="180" step="10" value="90">
+            <span class="interval-value" id="bathroom-interval-label">90 分钟</span>
+          </div>
+        </div>
+        <div class="countdown" id="bathroom-countdown">—</div>
+        <button class="btn btn-secondary" id="bathroom-now">立即提醒</button>
+      </div>
+    </section>
+
+    <section class="card quiet-card">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="emoji">🌙</span>
+          <span>免打扰时段</span>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="quiet-enabled">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="card-body" id="quiet-body">
+        <div class="time-row">
+          <label for="quiet-start">从</label>
+          <select id="quiet-start"></select>
+          <label for="quiet-end">到</label>
+          <select id="quiet-end"></select>
+        </div>
+        <p class="hint">免打扰时段内不会弹窗，但计时仍会继续</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span id="status-text">已启用</span>
+    <p class="hint footer-hint" id="badge-hint">图标数字为距下次提醒的剩余分钟数</p>
+  </footer>
+
+  <script src="popup.js"></script>
+</body>
+</html>

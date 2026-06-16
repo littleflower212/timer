@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "健康提醒",
+  "version": "1.0.6",
+  "description": "定时提醒喝水和上厕所，关爱你的健康",
+  "permissions": ["alarms", "notifications", "storage", "windows", "offscreen"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
