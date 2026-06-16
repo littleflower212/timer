@@ -1,0 +1,42 @@
+{
+  "name": "health-reminder",
+  "version": "1.0.0",
+  "description": "定时提醒喝水和上厕所的 macOS 桌面应用",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac",
+    "setup": "node scripts/setup.js",
+    "reinstall": "rm -rf node_modules pnpm-lock.yaml package-lock.json && pnpm install"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "@noble/hashes": "1.4.0"
+    }
+  },
+  "overrides": {
+    "@noble/hashes": "1.4.0"
+  },
+  "build": {
+    "appId": "com.littleflower212.timer",
+    "productName": "健康提醒",
+    "mac": {
+      "category": "public.app-category.healthcare-fitness",
+      "icon": "assets/icon.png"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "reminder-preload.js",
+      "renderer/**/*",
+      "assets/**/*"
+    ]
+  }
+}
