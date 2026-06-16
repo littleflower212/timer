@@ -1,5 +1,6 @@
 ### Chrome 健康提醒插件，项目结构如下：
 
+```
 timer/
 ├── manifest.json          # 插件配置
 ├── background.js          # 后台定时与通知逻辑
@@ -8,6 +9,7 @@ timer/
     ├── popup.html         # 设置界面
     ├── popup.css
     └── popup.js
+```
 
 ### 功能
 - 喝水提醒：默认每 45 分钟提醒一次（可调 15–120 分钟）
