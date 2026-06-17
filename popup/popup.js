@@ -7,8 +7,7 @@ const DEFAULT_SETTINGS = {
   bathroomEnabled: true,
   bathroomInterval: 90,
   quietHoursEnabled: false,
-  quietStart: 22,
-  quietEnd: 8,
+  quietPeriods: [{ id: 'default', start: 1320, end: 480 }],
 };
 
 const ALARM_LABELS = {
@@ -30,9 +29,9 @@ const elements = {
   bathroomNow: document.getElementById('bathroom-now'),
   bathroomCard: document.getElementById('bathroom-card'),
   quietEnabled: document.getElementById('quiet-enabled'),
-  quietStart: document.getElementById('quiet-start'),
-  quietEnd: document.getElementById('quiet-end'),
   quietBody: document.getElementById('quiet-body'),
+  quietPeriodsList: document.getElementById('quiet-periods-list'),
+  quietAdd: document.getElementById('quiet-add'),
   statusText: document.getElementById('status-text'),
   badgeHint: document.getElementById('badge-hint'),
 };
@@ -40,6 +39,7 @@ const elements = {
 let countdownTimer = null;
 let tickTimer = null;
 let cachedStatus = null;
+let quietPeriods = [];
 
 function minutesUntil(scheduledTime) {
   if (!scheduledTime) return null;
@@ -76,12 +76,87 @@ function formatInterval(minutes) {
   return `${minutes} 分钟`;
 }
 
-function populateHourSelects() {
-  for (let h = 0; h < 24; h++) {
-    const label = `${String(h).padStart(2, '0')}:00`;
-    elements.quietStart.appendChild(new Option(label, h));
-    elements.quietEnd.appendChild(new Option(label, h));
+function normalizeTime(value) {
+  if (value < 24) return value * 60;
+  return value;
+}
+
+function formatTime(minutes) {
+  const m = normalizeTime(minutes);
+  const h = Math.floor(m / 60);
+  const min = m % 60;
+  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
+}
+
+function normalizeQuietPeriods(settings) {
+  const periods = (() => {
+    if (Array.isArray(settings.quietPeriods) && settings.quietPeriods.length > 0) {
+      return settings.quietPeriods;
+    }
+    if (settings.quietStart !== undefined) {
+      return [{ id: 'legacy', start: settings.quietStart, end: settings.quietEnd }];
+    }
+    return DEFAULT_SETTINGS.quietPeriods;
+  })();
+
+  return periods.map((p) => ({
+    ...p,
+    start: normalizeTime(p.start),
+    end: normalizeTime(p.end),
+  }));
+}
+
+function createTimeSelect(value, onChange) {
+  const select = document.createElement('select');
+  for (let m = 0; m < 24 * 60; m += 30) {
+    select.appendChild(new Option(formatTime(m), m));
   }
+  select.value = normalizeTime(value);
+  select.addEventListener('change', onChange);
+  return select;
+}
+
+function renderQuietPeriods() {
+  elements.quietPeriodsList.innerHTML = '';
+
+  quietPeriods.forEach((period, index) => {
+    const row = document.createElement('div');
+    row.className = 'quiet-period';
+
+    const timeRow = document.createElement('div');
+    timeRow.className = 'time-row';
+
+    const startLabel = document.createElement('label');
+    startLabel.textContent = '从';
+    const startSelect = createTimeSelect(period.start, () => {
+      quietPeriods[index].start = Number(startSelect.value);
+      saveSettings().then(refreshStatus);
+    });
+
+    const endLabel = document.createElement('label');
+    endLabel.textContent = '到';
+    const endSelect = createTimeSelect(period.end, () => {
+      quietPeriods[index].end = Number(endSelect.value);
+      saveSettings().then(refreshStatus);
+    });
+
+    timeRow.append(startLabel, startSelect, endLabel, endSelect);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'btn-delete';
+    deleteBtn.type = 'button';
+    deleteBtn.textContent = '×';
+    deleteBtn.title = '删除此时段';
+    deleteBtn.disabled = quietPeriods.length <= 1;
+    deleteBtn.addEventListener('click', () => {
+      quietPeriods.splice(index, 1);
+      renderQuietPeriods();
+      saveSettings().then(refreshStatus);
+    });
+
+    row.append(timeRow, deleteBtn);
+    elements.quietPeriodsList.appendChild(row);
+  });
 }
 
 function applySettings(settings) {
@@ -96,9 +171,10 @@ function applySettings(settings) {
   elements.bathroomCard.classList.toggle('disabled', !settings.bathroomEnabled);
 
   elements.quietEnabled.checked = settings.quietHoursEnabled;
-  elements.quietStart.value = settings.quietStart;
-  elements.quietEnd.value = settings.quietEnd;
   elements.quietBody.style.opacity = settings.quietHoursEnabled ? '1' : '0.5';
+
+  quietPeriods = normalizeQuietPeriods(settings);
+  renderQuietPeriods();
 
   const anyEnabled = settings.waterEnabled || settings.bathroomEnabled;
   elements.statusText.textContent = anyEnabled ? '提醒运行中' : '所有提醒已关闭';
@@ -130,8 +206,11 @@ async function saveSettings() {
     bathroomEnabled: elements.bathroomEnabled.checked,
     bathroomInterval: Number(elements.bathroomInterval.value),
     quietHoursEnabled: elements.quietEnabled.checked,
-    quietStart: Number(elements.quietStart.value),
-    quietEnd: Number(elements.quietEnd.value),
+    quietPeriods: quietPeriods.map((p) => ({
+      id: p.id,
+      start: Number(p.start),
+      end: Number(p.end),
+    })),
   };
   await chrome.storage.sync.set(settings);
   applySettings(settings);
@@ -155,8 +234,6 @@ function bindEvents() {
   elements.waterEnabled.addEventListener('change', saveAndRefresh);
   elements.bathroomEnabled.addEventListener('change', saveAndRefresh);
   elements.quietEnabled.addEventListener('change', saveAndRefresh);
-  elements.quietStart.addEventListener('change', saveAndRefresh);
-  elements.quietEnd.addEventListener('change', saveAndRefresh);
 
   elements.waterInterval.addEventListener('input', () => {
     elements.waterIntervalLabel.textContent = formatInterval(Number(elements.waterInterval.value));
@@ -167,6 +244,16 @@ function bindEvents() {
     elements.bathroomIntervalLabel.textContent = formatInterval(Number(elements.bathroomInterval.value));
   });
   elements.bathroomInterval.addEventListener('change', saveAndRefresh);
+
+  elements.quietAdd.addEventListener('click', () => {
+    quietPeriods.push({
+      id: `period-${Date.now()}`,
+      start: 720,
+      end: 780,
+    });
+    renderQuietPeriods();
+    saveSettings().then(refreshStatus);
+  });
 
   async function remindNow(alarmName, countdownEl) {
     countdownEl.textContent = '发送中…';
@@ -192,7 +279,6 @@ function bindEvents() {
   });
 }
 
-populateHourSelects();
 bindEvents();
 refreshStatus();
 

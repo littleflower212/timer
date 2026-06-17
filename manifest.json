@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "健康提醒",
-  "version": "1.0.6",
+  "version": "1.1.1",
   "description": "定时提醒喝水和上厕所，关爱你的健康",
   "permissions": ["alarms", "notifications", "storage", "windows", "offscreen"],
   "background": {

@@ -6,6 +6,9 @@
 
 body {
   width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
   background: linear-gradient(160deg, #f0f9ff 0%, #e0f2fe 50%, #f0fdf4 100%);
   color: #1e293b;
@@ -42,6 +45,8 @@ main {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .card {
@@ -231,6 +236,65 @@ input[type='range']::-webkit-slider-thumb {
 }
 
 .quiet-card .card-body {
+  gap: 8px;
+}
+
+.quiet-period {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.quiet-period .time-row {
+  flex: 1;
+}
+
+.btn-delete {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: #fee2e2;
+  color: #ef4444;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-delete:hover {
+  background: #fecaca;
+}
+
+.btn-delete:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-add {
+  width: 100%;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 13px;
+  color: #3b82f6;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-add:hover {
+  background: #f0f9ff;
+  border-color: #3b82f6;
+}
+
+#quiet-periods-list {
+  display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 

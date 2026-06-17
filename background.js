@@ -13,9 +13,49 @@ const DEFAULT_SETTINGS = {
   bathroomEnabled: true,
   bathroomInterval: 90,
   quietHoursEnabled: false,
-  quietStart: 22,
-  quietEnd: 8,
+  quietPeriods: [{ id: 'default', start: 1320, end: 480 }],
 };
+
+function normalizeTime(value) {
+  if (value < 24) return value * 60;
+  return value;
+}
+
+function getQuietPeriods(settings) {
+  const periods = (() => {
+    if (Array.isArray(settings.quietPeriods) && settings.quietPeriods.length > 0) {
+      return settings.quietPeriods;
+    }
+    if (settings.quietStart !== undefined) {
+      return [{ id: 'legacy', start: settings.quietStart, end: settings.quietEnd }];
+    }
+    return DEFAULT_SETTINGS.quietPeriods;
+  })();
+
+  return periods.map((p) => ({
+    ...p,
+    start: normalizeTime(p.start),
+    end: normalizeTime(p.end),
+  }));
+}
+
+function getNowMinutes() {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
+}
+
+function isTimeInPeriod(minute, start, end) {
+  const s = normalizeTime(start);
+  const e = normalizeTime(end);
+  if (s < e) return minute >= s && minute < e;
+  return minute >= s || minute < e;
+}
+
+function isQuietHour(settings) {
+  if (!settings.quietHoursEnabled) return false;
+  const now = getNowMinutes();
+  return getQuietPeriods(settings).some((p) => isTimeInPeriod(now, p.start, p.end));
+}
 
 const REMINDERS = {
   [ALARM_WATER]: {
@@ -33,16 +73,6 @@ const REMINDERS = {
 async function getSettings() {
   const stored = await chrome.storage.sync.get(DEFAULT_SETTINGS);
   return { ...DEFAULT_SETTINGS, ...stored };
-}
-
-function isQuietHour(settings) {
-  if (!settings.quietHoursEnabled) return false;
-  const hour = new Date().getHours();
-  const { quietStart, quietEnd } = settings;
-  if (quietStart < quietEnd) {
-    return hour >= quietStart && hour < quietEnd;
-  }
-  return hour >= quietStart || hour < quietEnd;
 }
 
 async function scheduleAlarm(name, intervalMinutes) {
